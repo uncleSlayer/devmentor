@@ -11,17 +11,14 @@ embeddings = OpenAIEmbeddings(model="text-embedding-3-large", api_key=settings.O
 supabase_url = settings.SUPABASE_URL
 supabase_key = settings.SUPABASE_KEY
 
-supabase_client = create_client(supabase_url, supabase_key)
+supabase_client: Client = create_client(supabase_url, supabase_key)
 
 file_path = "/home/uncleslayer/dev/devmentor/devmentor/documents/python-beej-guide.pdf"
 
-print("file_path", file_path)
 loader = PyPDFLoader(file_path)
 documents = loader.load()
 text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
 docs = text_splitter.split_documents(documents)
-
-print(docs[0].metadata)
 
 vector_store = SupabaseVectorStore.from_documents(
     docs,
