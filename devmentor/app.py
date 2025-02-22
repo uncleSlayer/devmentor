@@ -4,6 +4,8 @@ from sqlmodel import SQLModel, create_engine, Session
 from src.database.connection import engine
 from src.database.model import *
 from config.env import settings
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # routers
 from src.routers.user import router as user_router
@@ -18,6 +20,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # mount routers
 app.include_router(user_router)

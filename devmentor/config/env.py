@@ -13,6 +13,7 @@ class EnvSettings(BaseSettings):
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY")
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
 
 
 settings = EnvSettings()
