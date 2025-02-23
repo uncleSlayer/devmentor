@@ -3,7 +3,7 @@ from src.database.model import UserQuestion, User, AiAnswer
 from src.token_verify import verify_token
 from sqlmodel import Session, select
 from src.database.connection import engine
-from src.ai import generate_answer
+from src.langgraph.graph import generate_answer
 
 
 router = APIRouter()
@@ -40,11 +40,11 @@ def question(question: UserQuestion, request: Request):
 
         answer = generate_answer(question)
 
-        ai_answer = AiAnswer(user_question_id=user_question.id, answer=answer.content)
+        # ai_answer = AiAnswer(user_question_id=user_question.id, answer=answer.content)
 
-        session.add(ai_answer)
+        # session.add(ai_answer)
         
-        session.commit()
+        # session.commit()
      
 
-    return {"answer": answer.content}
+    return {"answer": answer}
