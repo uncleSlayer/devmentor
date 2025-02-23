@@ -18,3 +18,5 @@ class AiAnswer(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_question_id: int = Field(foreign_key="userquestion.id", nullable=False)
     answer: str
+    code_snippet: Optional[str] = Field(nullable=True)
+    code_language: Optional[str] = Field(nullable=True)

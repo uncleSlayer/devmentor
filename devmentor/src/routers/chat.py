@@ -16,13 +16,13 @@ def question(question: UserQuestion, request: Request):
 
     token = request.cookies.get("auth_token")
 
-    payload = verify_token(token) 
+    payload = verify_token(token)
 
     user_email = payload.get("email")
 
     if not user_email:
         return {"message": "Something went wrong"}
-    
+
     with Session(engine) as session:
 
         statement = select(User).where(User.email == user_email)
@@ -31,20 +31,26 @@ def question(question: UserQuestion, request: Request):
 
         if not existing_user:
             return {"message": "User does not exist"}
-        
+
         user_question = UserQuestion(author_id=existing_user.id, question=question)
 
         session.add(user_question)
 
         session.commit()
 
-        answer = generate_answer(question)
+        answer = dict(generate_answer(question))
 
-        # ai_answer = AiAnswer(user_question_id=user_question.id, answer=answer.content)
+        print("answer", answer)
 
-        # session.add(ai_answer)
-        
-        # session.commit()
-     
+        ai_answer = AiAnswer(
+            user_question_id=user_question.id,
+            answer=answer.get("answer"),
+            code_snippet=answer.get("code_block"),
+            code_language="python",
+        )
+
+        session.add(ai_answer)
+
+        session.commit()
 
     return {"answer": answer}
