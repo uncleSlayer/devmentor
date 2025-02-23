@@ -54,3 +54,36 @@ def question(question: UserQuestion, request: Request):
         session.commit()
 
     return {"answer": answer}
+
+
+@router.get("/run/{answer_id}")
+def run_code(answer_id: int, request: Request):
+    token = request.cookies.get("auth_token")
+
+    payload = verify_token(token)
+
+    user_email = payload.get("email")
+
+    if not user_email:
+        return {"message": "Something went wrong"}
+
+
+    with Session(engine) as session:
+
+        statement = select(User).where(User.email == user_email)
+
+        existing_user = session.exec(statement).first()
+
+        if not existing_user:
+            return {"message": "User does not exist"}
+        
+        statement = select(AiAnswer).where(AiAnswer.id == answer_id)
+
+        ai_answer = session.exec(statement).first()
+
+        if not ai_answer:
+            return {"message": "Invalid answer id"}
+        
+        code_block = ai_answer.code_snippet
+
+        return {"code_block": code_block}
