@@ -5,6 +5,7 @@ from src.database.connection import engine
 from src.database.model import *
 from config.env import settings
 from fastapi.middleware.cors import CORSMiddleware
+from src.routers.chat import router as chat_router
 
 
 # routers
@@ -31,6 +32,7 @@ app.add_middleware(
 
 # mount routers
 app.include_router(user_router)
+app.include_router(chat_router)
 
 @app.get("/")
 def read_root():
