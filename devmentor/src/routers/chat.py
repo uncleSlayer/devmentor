@@ -4,6 +4,7 @@ from src.token_verify import verify_token
 from sqlmodel import Session, select
 from src.database.connection import engine
 from src.langgraph.graph import generate_answer
+from src.docker import run_ai_answer_code
 
 
 router = APIRouter()
@@ -67,7 +68,6 @@ def run_code(answer_id: int, request: Request):
     if not user_email:
         return {"message": "Something went wrong"}
 
-
     with Session(engine) as session:
 
         statement = select(User).where(User.email == user_email)
@@ -76,14 +76,16 @@ def run_code(answer_id: int, request: Request):
 
         if not existing_user:
             return {"message": "User does not exist"}
-        
+
         statement = select(AiAnswer).where(AiAnswer.id == answer_id)
 
         ai_answer = session.exec(statement).first()
 
         if not ai_answer:
             return {"message": "Invalid answer id"}
-        
+
         code_block = ai_answer.code_snippet
+
+        print(run_ai_answer_code(code_block=code_block))
 
         return {"code_block": code_block}
