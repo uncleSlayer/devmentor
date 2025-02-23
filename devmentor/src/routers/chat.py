@@ -54,7 +54,9 @@ def question(question: UserQuestion, request: Request):
 
         session.commit()
 
-    return {"answer": answer}
+        answer["id"] = ai_answer.id
+
+        return {"answer": answer}
 
 
 @router.get("/run/{answer_id}")
@@ -86,6 +88,6 @@ def run_code(answer_id: int, request: Request):
 
         code_block = ai_answer.code_snippet
 
-        print(run_ai_answer_code(code_block=code_block))
+        code_runner_output = run_ai_answer_code(code_block=code_block)
 
-        return {"code_block": code_block}
+        return {"code_block": code_runner_output}

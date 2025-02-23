@@ -34,6 +34,12 @@ def run_ai_answer_code(code_block: str):
 
         output = container.logs().decode("utf-8")
 
+        print("\n")
+        print("============================")
+        print("==========result============")
+        print(output)
+        print("============================")
+
     except Exception as e:
 
         output = f"Error during execution: {e}"
