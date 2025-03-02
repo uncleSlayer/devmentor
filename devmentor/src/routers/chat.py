@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from src.database.model import UserQuestion, User, AiAnswer
+from src.database.model import UserQuestion, User, AiAnswer, Conversation
 from src.token_verify import verify_token
 from sqlmodel import Session, select
 from src.database.connection import engine
@@ -32,16 +32,16 @@ def question(question: UserQuestion, request: Request):
 
         if not existing_user:
             return {"message": "User does not exist"}
+        
+        conversation = Conversation(user_id=existing_user.id)
+        session.add(conversation)
+        session.commit()
 
-        user_question = UserQuestion(author_id=existing_user.id, question=question)
-
+        user_question = UserQuestion(author_id=existing_user.id, question=question, conversation_id=conversation.id)
         session.add(user_question)
-
         session.commit()
 
         answer = dict(generate_answer(question))
-
-        print("answer", answer)
 
         ai_answer = AiAnswer(
             user_question_id=user_question.id,

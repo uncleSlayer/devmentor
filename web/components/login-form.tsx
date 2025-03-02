@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import React from "react"
 import axios from "axios"
+import { useRouter } from "next/navigation"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
 
+  const router = useRouter() 
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
 
@@ -31,6 +33,7 @@ export function LoginForm({
       console.log("something went wrong")
     } else {
       console.log(response.data)
+      router.push('/dashboard')
     }
 
   }
