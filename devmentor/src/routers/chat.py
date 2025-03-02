@@ -10,7 +10,7 @@ from src.docker import run_ai_answer_code
 router = APIRouter()
 
 
-@router.post("/question")
+@router.post("/chat/new")
 def question(question: UserQuestion, request: Request):
 
     question = question.question
@@ -32,12 +32,16 @@ def question(question: UserQuestion, request: Request):
 
         if not existing_user:
             return {"message": "User does not exist"}
-        
+
         conversation = Conversation(user_id=existing_user.id)
         session.add(conversation)
         session.commit()
 
-        user_question = UserQuestion(author_id=existing_user.id, question=question, conversation_id=conversation.id)
+        user_question = UserQuestion(
+            author_id=existing_user.id,
+            question=question,
+            conversation_id=conversation.id,
+        )
         session.add(user_question)
         session.commit()
 
@@ -57,6 +61,50 @@ def question(question: UserQuestion, request: Request):
         answer["id"] = ai_answer.id
 
         return {"answer": answer}
+
+
+@router.get("/chat/{conversation_id}")
+def chat(conversation_id: int, request: Request):
+
+    token = request.cookies.get("auth_token")
+
+    payload = verify_token(token)
+
+    user_email = payload.get("email")
+
+    if not user_email:
+        return {"message": "Something went wrong"}
+
+    with Session(engine) as session:
+
+        try:
+
+            statement = select(User).where(User.email == user_email)
+
+            existing_user = session.exec(statement).first()
+
+            if not existing_user:
+                return {"message": "User does not exist"}
+
+            statement = select(
+                UserQuestion.question, AiAnswer.answer, Conversation.id
+            ).join(
+                target=AiAnswer,
+                onclause=AiAnswer.user_question_id == UserQuestion.id,
+                isouter=False
+                # UserQuestion.id == AiAnswer.user_question_id
+            ).join(
+                target=Conversation,
+                onclause=Conversation.id == UserQuestion.conversation_id,
+                isouter=False
+            ).where(Conversation.id == conversation_id)
+
+            user_questions = session.exec(statement).all()
+
+            return {"user_questions": user_questions}
+        
+        except Exception as e:
+            return {"message": str(e)}
 
 
 @router.get("/run/{answer_id}")
