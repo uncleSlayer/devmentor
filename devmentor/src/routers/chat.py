@@ -97,7 +97,9 @@ def chat(conversation_id: int, request: Request):
                 target=Conversation,
                 onclause=Conversation.id == UserQuestion.conversation_id,
                 isouter=False
-            ).where(Conversation.id == conversation_id)
+            ).where(
+                Conversation.id == conversation_id
+            )
 
             user_questions = session.exec(statement).all()
 
@@ -105,6 +107,51 @@ def chat(conversation_id: int, request: Request):
         
         except Exception as e:
             return {"message": str(e)}
+
+
+@router.post("/chat/continue/{conversation_id}")
+def chat(conversation_id: int, request: Request):
+
+    token = request.cookies.get("auth_token")
+
+    token_info = verify_token(token)
+
+    user_email = token_info.get("email")
+
+    if not user_email:
+        return {"message": "Something went wrong"}
+
+    with Session(engine) as session:
+
+        try:
+
+            statement = select(User).where(User.email == user_email)
+
+            existing_user = session.exec(statement).first()
+
+            if not existing_user:
+                return {"message": "User does not exist"}
+
+            question = UserQuestion(author_id=existing_user.id, conversation_id=conversation_id)
+            session.add(question)
+            session.commit()
+
+            answer = dict(generate_answer(question.question))
+
+            ai_answer = AiAnswer(
+                user_question_id=question.id,
+                answer=answer.get("answer"),
+                code_snippet=answer.get("code_block"),
+                code_language="python",
+            )
+            session.add(ai_answer)
+            session.commit() 
+
+            return {"answer": ai_answer}
+
+
+        except Exception as e:
+            return {"error": str(e)}
 
 
 @router.get("/run/{answer_id}")
