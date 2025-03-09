@@ -1,7 +1,7 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-import { headers } from 'next/headers'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+"use client"
 
+import { Calendar, Home, Inbox, PlusIcon, Search, Settings } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     Sidebar,
     SidebarContent,
@@ -13,6 +13,8 @@ import {
     SidebarMenuItem,
     SidebarFooter
 } from "@/components/ui/sidebar"
+import { Button } from "./ui/button"
+import { useRouter } from "next/navigation"
 
 // Menu items.
 const items = [
@@ -43,16 +45,25 @@ const items = [
     },
 ]
 
-export async function AppSidebar() {
+export function AppSidebar() {
 
-    const headersList = await headers()
-    const email = headersList.get("x-userEmail")
+    const router = useRouter()
 
-    console.log("email", email)
+    const handlePlusButtonClick = () => {
+        router.push("/conversation/new")
+    }
 
     return (
         <Sidebar>
             <SidebarContent>
+                <Button onClick={handlePlusButtonClick} className="flex flex-row items-center justify-center w-1/2 m-2 shadow-lg rounded-lg">
+                    <span>
+                        <PlusIcon />
+                    </span>
+                    <span>
+                        conversation
+                    </span>
+                </Button>
                 <SidebarGroup>
                     <SidebarGroupLabel>Message history</SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -71,13 +82,12 @@ export async function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter className="flex flex-row items-center border m-2 shadow-lg rounded-lg" >
+            {/* <SidebarFooter className="flex flex-row items-center border m-2 shadow-lg rounded-lg" >
                 <Avatar>
                     <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <span>{ email }</span>
-            </SidebarFooter>
+            </SidebarFooter> */}
         </Sidebar>
     )
 }

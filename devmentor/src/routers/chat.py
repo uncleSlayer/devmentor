@@ -12,6 +12,9 @@ router = APIRouter()
 
 @router.post("/chat/new")
 def question(question: UserQuestion, request: Request):
+    """
+    This endpoint is used to ask a new question to the AI
+    """
 
     question = question.question
 
@@ -65,6 +68,9 @@ def question(question: UserQuestion, request: Request):
 
 @router.get("/chat/{conversation_id}")
 def chat(conversation_id: int, request: Request):
+    """
+    This endpoint is used to get the chat history of a conversation
+    """
 
     token = request.cookies.get("auth_token")
 
@@ -86,25 +92,26 @@ def chat(conversation_id: int, request: Request):
             if not existing_user:
                 return {"message": "User does not exist"}
 
-            statement = select(
-                UserQuestion.question, AiAnswer.answer, Conversation.id
-            ).join(
-                target=AiAnswer,
-                onclause=AiAnswer.user_question_id == UserQuestion.id,
-                isouter=False
-                # UserQuestion.id == AiAnswer.user_question_id
-            ).join(
-                target=Conversation,
-                onclause=Conversation.id == UserQuestion.conversation_id,
-                isouter=False
-            ).where(
-                Conversation.id == conversation_id
+            statement = (
+                select(UserQuestion.question, AiAnswer.answer, Conversation.id)
+                .join(
+                    target=AiAnswer,
+                    onclause=AiAnswer.user_question_id == UserQuestion.id,
+                    isouter=False,
+                    # UserQuestion.id == AiAnswer.user_question_id
+                )
+                .join(
+                    target=Conversation,
+                    onclause=Conversation.id == UserQuestion.conversation_id,
+                    isouter=False,
+                )
+                .where(Conversation.id == conversation_id)
             )
 
             user_questions = session.exec(statement).all()
 
             return {"user_questions": user_questions}
-        
+
         except Exception as e:
             return {"message": str(e)}
 
@@ -132,7 +139,9 @@ def chat(conversation_id: int, request: Request):
             if not existing_user:
                 return {"message": "User does not exist"}
 
-            question = UserQuestion(author_id=existing_user.id, conversation_id=conversation_id)
+            question = UserQuestion(
+                author_id=existing_user.id, conversation_id=conversation_id
+            )
             session.add(question)
             session.commit()
 
@@ -145,10 +154,9 @@ def chat(conversation_id: int, request: Request):
                 code_language="python",
             )
             session.add(ai_answer)
-            session.commit() 
+            session.commit()
 
             return {"answer": ai_answer}
-
 
         except Exception as e:
             return {"error": str(e)}
