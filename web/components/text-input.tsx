@@ -7,6 +7,7 @@ import { SendIcon } from 'lucide-react'
 import axios from 'axios'
 import { SERVER_URL } from '@/config'
 import { useRouter } from 'next/navigation'
+import { useConversationStore } from '@/zustand/store'
 
 const TextInput = ({
 
@@ -24,6 +25,8 @@ const TextInput = ({
 
 }) => {
 
+    const { addConversation } = useConversationStore()
+
     const router = useRouter()
 
     const [messageInputText, setMessageInputText] = React.useState('')
@@ -36,25 +39,48 @@ const TextInput = ({
 
         if (newConversation && setNewConversationQuestion) {
             setNewConversationQuestion(messageInputText)
-        }
 
-        const response = await axios.post(`${SERVER_URL}/conversation`, {
-            question: messageInputText
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            withCredentials: true
-        })
+            const response = await axios.post(`${SERVER_URL}/conversation`, {
+                question: messageInputText
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            })
 
-        if (response.status === 200) {
+            if (response.status === 200) {
 
-            const { conversation }: { conversation: { conversation_id: string } } = response.data
+                const { conversation, ai_answer, question_info }: {
+                    conversation: { conversation_id: string, title: string },
+                    question_info: { question_id: string, question: string, author_id: string },
+                    ai_answer: { answer_id: string, answer: string, code_snippet: string, code_language: string }
+                } = response.data
 
-            router.push(`/conversation/${conversation.conversation_id}`)
+                addConversation({
+                    id: conversation.conversation_id,
+                    title: conversation.title,
+                    chat: [
+                        {
+                            question: {
+                                id: question_info.question_id,
+                                question: question_info.question
+                            },
+                            answer: {
+                                id: ai_answer.answer_id,
+                                answer: ai_answer.answer,
+                                code_snippet: ai_answer.code_snippet,
+                                code_language: ai_answer.code_language
+                            }
+                        }
+                    ]
+                })
 
-        } else {
-            console.error('Failed to send message')
+                router.push(`/conversation/${conversation.conversation_id}`)
+
+            } else {
+                console.error('Failed to send message')
+            }
         }
 
     }
