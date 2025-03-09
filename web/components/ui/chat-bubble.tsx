@@ -1,5 +1,9 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+"use client"
+
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import CodeRenderer from "./code-renderer";
+
 
 interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   message: string
@@ -33,7 +37,8 @@ const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
               : "bg-muted text-muted-foreground"
           )}
         >
-          <p className="text-sm">{message}</p>
+          <CodeRenderer text={message} />
+          {/* <p className="text-sm">{message}</p> */}
           {timestamp && (
             <time className={cn(
               "mt-1 block text-xs opacity-70",

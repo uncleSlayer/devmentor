@@ -25,20 +25,18 @@ const ChatWindow = ({
 
                         const { question, answer } = chat
 
-                        return (<>
+                        return (<div key={index}>
                             <ChatBubble
                                 message={question.question}
                                 sender="user"
-                                timestamp="10:30 AM"
                                 avatar={<User className="h-4 w-4" />}
                             />
                             <ChatBubble
                                 message={answer.answer}
                                 sender="bot"
-                                timestamp="10:30 AM"
                                 avatar={<Bot className="h-4 w-4" />}
                             />
-                        </>)
+                        </div>)
                     })
                 } 
             </div>
