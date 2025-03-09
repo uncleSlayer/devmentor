@@ -18,7 +18,7 @@ const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
       <div
         ref={ref}
         className={cn(
-          "flex w-full gap-2",
+          "flex w-full gap-2 m-4",
           sender === "user" ? "justify-end" : "justify-start",
           className
         )}

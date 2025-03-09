@@ -79,6 +79,7 @@ const TextInput = ({
                 router.push(`/conversation/${conversation.conversation_id}`)
 
             } else {
+                setMessageInputText("I could not think of a solution to your problem. Please try with a different question.")
                 console.error('Failed to send message')
             }
         }

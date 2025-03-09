@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from src.database.model import UserQuestion, User, AiAnswer, Conversation
 from src.token_verify import verify_token
 from sqlmodel import Session, select
@@ -67,7 +67,8 @@ def question(question: UserQuestion, request: Request):
 
 
 @router.get("/chat/{conversation_id}")
-def chat(conversation_id: int, request: Request):
+def chat(conversation_id: str, request: Request):
+    
     """
     This endpoint is used to get the chat history of a conversation
     """
@@ -79,7 +80,7 @@ def chat(conversation_id: int, request: Request):
     user_email = payload.get("email")
 
     if not user_email:
-        return {"message": "Something went wrong"}
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
     with Session(engine) as session:
 
@@ -90,10 +91,10 @@ def chat(conversation_id: int, request: Request):
             existing_user = session.exec(statement).first()
 
             if not existing_user:
-                return {"message": "User does not exist"}
+                raise HTTPException(status_code=404, detail="User does not exist")
 
             statement = (
-                select(UserQuestion.question, AiAnswer.answer, Conversation.id)
+                select(UserQuestion, AiAnswer, Conversation)
                 .join(
                     target=AiAnswer,
                     onclause=AiAnswer.user_question_id == UserQuestion.id,
@@ -108,12 +109,36 @@ def chat(conversation_id: int, request: Request):
                 .where(Conversation.id == conversation_id)
             )
 
-            user_questions = session.exec(statement).all()
+            result = session.exec(statement).all()  
 
-            return {"user_questions": user_questions}
+            if not result:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+ 
+            return {
+                "conversation": {
+                    "conversation_id": conversation_id,
+                    "title": result[0][2].title or "Untitled conversation",
+                },
+                "user_queries": [
+                    {
+                        "question": {
+                            "question_id": retrived_user_question.id,
+                            "question": retrived_user_question.question,
+                            "author_id": retrived_user_question.author_id
+                        },
+                        "answer": {
+                            "answer_id": retrived_ai_answer.id,
+                            "answer": retrived_ai_answer.answer,
+                            "code_snippet": retrived_ai_answer.code_snippet,
+                            "code_language": retrived_ai_answer.code_language
+                        },
+                    } for retrived_user_question, retrived_ai_answer, _ in result
+                ]
+            }
 
         except Exception as e:
-            return {"message": str(e)}
+            print(e)
+            raise HTTPException(status_code=404, detail=f"Something went wrong: {str(e)}")
 
 
 @router.post("/chat/continue/{conversation_id}")
