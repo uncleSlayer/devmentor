@@ -1,13 +1,12 @@
 import TextInput from '@/components/text-input'
+import Image from 'next/image'
 import React from 'react'
 
 const page = () => {
     return (
-        <div className='bg-slate-200 absolute left-0 right-0 top-5 bottom-0 m-4 rounded-lg p-4 flex flex-col justify-between'>
-            <h1>New conversation</h1>
-            <div className='bg-slate-500 w-3/4 mx-auto rounded-lg p-4'>
-                <TextInput />
-            </div>
+        <div className='flex h-full flex-col justify-between gap-4'>
+            <Image className='w-full h-[95%] object-cover rounded-lg' src='/create_conversation.webp' alt='create new conversation' width={1000} height={1000} />
+            <TextInput />
         </div>
     )
 }

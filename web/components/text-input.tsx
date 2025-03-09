@@ -1,4 +1,5 @@
 "use client"
+
 import React from 'react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
@@ -30,9 +31,9 @@ const TextInput = () => {
 
         if (response.status === 200) {
 
-            const { conversation_id } = response.data
+            const { conversation }: { conversation: { conversation_id: string } } = response.data
 
-            router.push(`/conversation/${conversation_id}`)
+            router.push(`/conversation/${conversation.conversation_id}`)
 
         } else {
             console.error('Failed to send message')
@@ -42,8 +43,10 @@ const TextInput = () => {
 
     return (
         <div className='flex items-center justify-center gap-3'>
-            <Input className='text-white placeholder:text-white' value={messageInputText} onChange={(e) => setMessageInputText(e.target.value)} placeholder='Type your message here...' />
-            <SendIcon onClick={handleSendButtonClick} fill='white' color='white' />
+            <Input className='bg-white text-black placeholder:text-black border-0 shadow-none focus-visible:ring-0' value={messageInputText} onChange={(e) => setMessageInputText(e.target.value)} placeholder='Type your message here...' />
+            <div className='rounded-full bg-white p-2 hover:scale-105 cursor-pointer'>
+                <SendIcon onClick={handleSendButtonClick} size={20} fill='black' color='black' />
+            </div>
         </div>
     )
 }
