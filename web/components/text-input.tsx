@@ -8,7 +8,21 @@ import axios from 'axios'
 import { SERVER_URL } from '@/config'
 import { useRouter } from 'next/navigation'
 
-const TextInput = () => {
+const TextInput = ({
+
+    newConversation,
+    newConversationQuestion,
+
+    setNewConversationQuestion
+
+}: {
+
+    newConversation?: boolean,
+    newConversationQuestion?: string,
+
+    setNewConversationQuestion?: React.Dispatch<React.SetStateAction<string>>
+
+}) => {
 
     const router = useRouter()
 
@@ -18,6 +32,10 @@ const TextInput = () => {
 
         if (messageInputText.trim() === '') {
             return
+        }
+
+        if (newConversation && setNewConversationQuestion) {
+            setNewConversationQuestion(messageInputText)
         }
 
         const response = await axios.post(`${SERVER_URL}/conversation`, {
@@ -43,7 +61,7 @@ const TextInput = () => {
 
     return (
         <div className='flex items-center justify-center gap-3'>
-            <Input className='bg-white text-black placeholder:text-black border-0 shadow-none focus-visible:ring-0' value={messageInputText} onChange={(e) => setMessageInputText(e.target.value)} placeholder='Type your message here...' />
+            <Input className='bg-white text-black placeholder:text-black placeholder:text-muted-foreground border-0 shadow-none focus-visible:ring-0' value={messageInputText} onChange={(e) => { setMessageInputText(e.target.value) }} placeholder='Write a python function to print a circle using * and # characters' />
             <div className='rounded-full bg-white p-2 hover:scale-105 cursor-pointer'>
                 <SendIcon onClick={handleSendButtonClick} size={20} fill='black' color='black' />
             </div>

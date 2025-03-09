@@ -9,7 +9,7 @@ const page = ({
 }) => {
   return (
     <div className='flex h-full flex-col justify-between gap-4'>
-      <div className='w-full h-[95%] bg-red-200 rounded-lg'>
+      <div className='w-full h-[95%] rounded-lg'>
         <ChatWindow />
       </div>
       <TextInput />

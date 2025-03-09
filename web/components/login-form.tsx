@@ -33,7 +33,7 @@ export function LoginForm({
       console.log("something went wrong")
     } else {
       console.log(response.data)
-      router.push('/dashboard')
+      router.push('/conversation/new')
     }
 
   }
