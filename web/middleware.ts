@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
 export async function middleware(request: NextRequest) {
+    
     if (request.nextUrl.pathname === '/login') {
         return NextResponse.next()
     }
@@ -10,11 +11,17 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('auth_token')
 
     if (!token) {
+        
         return NextResponse.redirect(new URL('/login', request.url))
+    
     } else {
-        try { 
-            const { payload } = await jwtVerify(token.value, new TextEncoder().encode(process.env.JWT_SECRET!))
 
+        try { 
+
+            const { payload } = await jwtVerify(token.value, new TextEncoder().encode(process.env.JWT_SECRET_KEY!))
+
+            console.log("the payload", payload)
+            
             const headers = new Headers(request.headers)
 
             headers.set("x-userEmail", Object(payload).email)

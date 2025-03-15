@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, HTTPException
 from src.database.model import User
 from src.database.connection import engine
 from sqlmodel import Session, select
@@ -36,7 +36,7 @@ def register(user: User):
         existing_user = session.exec(statement).first()
 
         if existing_user:
-            return {"message": "User already exists"}
+            raise HTTPException(status_code=400, detail="User already exists")
 
         session.add(user)
         session.commit()
@@ -57,14 +57,14 @@ async def login(login_form_data: LoginForm):
         existing_user = session.exec(statement).first()
 
         if not existing_user:
-            return {"message": "User does not exist"}
+            raise HTTPException(status_code=400, detail="Incorrect email")
 
         password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
         if not password_context.verify(
             login_form_data.password, existing_user.hashed_password
         ):
-            return {"message": "Incorrect password"}
+            raise HTTPException(status_code=400, detail="Incorrect password")
 
         auth_jwt_token = jwt.encode(
             {"email": existing_user.email}, settings.JWT_SECRET_KEY, "HS256"

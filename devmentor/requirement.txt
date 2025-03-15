@@ -24,7 +24,7 @@ fastapi-cli==0.0.7
 filetype==1.2.0
 frozenlist==1.5.0
 google-ai-generativelanguage==0.6.15
-google-api-core==2.24.1
+google-api-core==2.24.2
 google-api-python-client==2.161.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
@@ -84,10 +84,8 @@ postgrest==0.19.3
 propcache==0.2.1
 proto-plus==1.26.0
 protobuf==5.29.3
-psycopg==3.2.4
-psycopg-binary==3.2.4
-psycopg-pool==3.2.4
-psycopg2-binary==2.9.10
+psycopg==3.2.6
+psycopg-binary==3.2.6
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pydantic==2.10.6

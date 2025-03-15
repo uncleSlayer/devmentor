@@ -25,7 +25,7 @@ def question(question: UserQuestion, request: Request):
     user_email = payload.get("email")
 
     if not user_email:
-        return {"message": "Something went wrong"}
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
     with Session(engine) as session:
 
@@ -34,7 +34,7 @@ def question(question: UserQuestion, request: Request):
         existing_user = session.exec(statement).first()
 
         if not existing_user:
-            return {"message": "User does not exist"}
+            raise HTTPException(status_code=401, detail="User does not exist")
 
         conversation = Conversation(user_id=existing_user.id)
         session.add(conversation)
@@ -151,7 +151,7 @@ def chat(conversation_id: int, request: Request):
     user_email = token_info.get("email")
 
     if not user_email:
-        return {"message": "Something went wrong"}
+        raise HTTPException(status_code=401, detail="No valid email found in the auth token")
 
     with Session(engine) as session:
 
@@ -162,7 +162,7 @@ def chat(conversation_id: int, request: Request):
             existing_user = session.exec(statement).first()
 
             if not existing_user:
-                return {"message": "User does not exist"}
+                raise HTTPException(status_code=401, detail="User does not exist")
 
             question = UserQuestion(
                 author_id=existing_user.id, conversation_id=conversation_id
@@ -184,7 +184,7 @@ def chat(conversation_id: int, request: Request):
             return {"answer": ai_answer}
 
         except Exception as e:
-            return {"error": str(e)}
+            raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/run/{answer_id}")
@@ -196,7 +196,7 @@ def run_code(answer_id: int, request: Request):
     user_email = payload.get("email")
 
     if not user_email:
-        return {"message": "Something went wrong"}
+        raise HTTPException(status_code=401, detail="No valid email found in the auth token")
 
     with Session(engine) as session:
 
@@ -205,14 +205,14 @@ def run_code(answer_id: int, request: Request):
         existing_user = session.exec(statement).first()
 
         if not existing_user:
-            return {"message": "User does not exist"}
+            raise HTTPException(status_code=401, detail="User does not exist")
 
         statement = select(AiAnswer).where(AiAnswer.id == answer_id)
 
         ai_answer = session.exec(statement).first()
 
         if not ai_answer:
-            return {"message": "Invalid answer id"}
+            raise HTTPException(status_code=404, detail="Invalid answer id")
 
         code_block = ai_answer.code_snippet
 
