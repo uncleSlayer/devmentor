@@ -10,9 +10,9 @@ router = APIRouter()
 
 
 class Question(BaseModel):
+
     """
     This is a model for the question that will be asked by the user
-
     """
 
     question: str

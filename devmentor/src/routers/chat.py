@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("/chat/new")
 def question(question: UserQuestion, request: Request):
     """
-    This endpoint is used to ask a new question to the AI
+    This endpoint is used to ask a new question to the AI. This also starts a new conversation in the database.
     """
 
     question = question.question
