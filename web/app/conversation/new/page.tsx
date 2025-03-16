@@ -34,7 +34,7 @@ const page = () => {
                 question.length === 0 && <Image className='w-full h-[95%] object-cover rounded-lg' src='/create_conversation.webp' alt='create new conversation' width={1000} height={1000} />
             }
             {/* <Image className='w-full h-[95%] object-cover rounded-lg' src='/create_conversation.webp' alt='create new conversation' width={1000} height={1000} /> */}
-            <TextInput newConversation newConversationQuestion={question} setNewConversationQuestion={setQuestion} />
+            <TextInput newConversation={true} setNewConversationQuestion={setQuestion} />
         </div>
     )
 }

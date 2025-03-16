@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 from src.database.connection import engine
 from src.langgraph.graph import generate_answer
 from src.docker import run_ai_answer_code
+from pydantic import BaseModel
 
 
 router = APIRouter()
@@ -141,8 +142,20 @@ def chat(conversation_id: str, request: Request):
             raise HTTPException(status_code=404, detail=f"Something went wrong: {str(e)}")
 
 
+class ContinueQuestion(BaseModel):
+
+    """
+    This is a model for the question that will be asked by the user
+    """
+
+    question: str
+
 @router.post("/chat/continue/{conversation_id}")
-def chat(conversation_id: int, request: Request):
+def chat(conversation_id: str, request: Request, question: ContinueQuestion):
+
+    """
+        This endpoint is used to continue a conversation with the AI. It also takes the new question and generates a new answer.
+    """
 
     token = request.cookies.get("auth_token")
 
@@ -164,24 +177,38 @@ def chat(conversation_id: int, request: Request):
             if not existing_user:
                 raise HTTPException(status_code=401, detail="User does not exist")
 
-            question = UserQuestion(
-                author_id=existing_user.id, conversation_id=conversation_id
+            new_question = UserQuestion(
+                author_id=existing_user.id, conversation_id=conversation_id, question=question.question
             )
-            session.add(question)
+
+            session.add(new_question)
             session.commit()
 
             answer = dict(generate_answer(question.question))
 
             ai_answer = AiAnswer(
-                user_question_id=question.id,
+                user_question_id=new_question.id,
                 answer=answer.get("answer"),
                 code_snippet=answer.get("code_block"),
                 code_language="python",
             )
+
             session.add(ai_answer)
             session.commit()
 
-            return {"answer": ai_answer}
+            return {"answer": {
+                "answer_info": {
+                    "answer_id": ai_answer.id,
+                    "answer": ai_answer.answer,
+                    "code_snippet": ai_answer.code_snippet,
+                    "code_language": ai_answer.code_language
+                },
+                "user_question_info": {
+                    "question_id": new_question.id,
+                    "question": new_question.question,
+                    "author_id": new_question.author_id
+                }
+            }}
 
         except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
