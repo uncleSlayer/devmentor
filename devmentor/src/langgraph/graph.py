@@ -2,9 +2,7 @@ from langgraph.graph import StateGraph
 from src.langgraph.state import SingleQuestionChatState
 from src.ai import llm, retriver
 from src.langgraph.tools import youtube_search_tool
-from youtube_search import YoutubeSearch
-from langchain_openai import ChatOpenAI
-from config.env import settings
+import ast
 
 single_question_chat_graph = StateGraph(SingleQuestionChatState)
 
@@ -20,36 +18,9 @@ class SingleQuestionGraph:
 
         question = state["question"]
 
-        # Chat gpt helped me write the tool calling function. Better to use something simple in this case, I can't be wrtting this without any proper docs.
-        llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.5, api_key=settings.OPENAI_API_KEY).bind(
-            functions=[{
-            "name": "youtube_search_tool",
-            "description": "Useful for searching YouTube videos based on a query.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The YouTube search query"
-                    }
-                },
-                "required": ["query"]
-            }
-        }]
-        )
+        youtube_suggestions = youtube_search_tool.run(question)
 
-        # youtube_suggestions: str = youtube_search_tool.run(question)
-
-        youtube_suggestions = llm.invoke(f"""
-        You are a helpful youtube search assistant. You use the youtube_search_tool to search for youtube videos based on the question.
-        You return a list of youtube videos.
-                                              
-        Question: {question}
-        """)
-
-        print("youtube_suggestions", youtube_suggestions)
-
-        state["youtube_suggestions"] = youtube_suggestions
+        state["youtube_suggestions"] = ast.literal_eval(youtube_suggestions)
 
         return state
 
