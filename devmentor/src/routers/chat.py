@@ -11,6 +11,7 @@ from pydantic import BaseModel
 router = APIRouter()
 
 
+# Probably we aren't using this or i don't know what it does, at this point just don't come here.
 @router.post("/chat/new")
 def question(question: UserQuestion, request: Request):
     """
@@ -64,6 +65,7 @@ def question(question: UserQuestion, request: Request):
             session.commit()
 
             answer["id"] = ai_answer.id
+            answer["youtube_suggestions"] = answer.get("youtube_suggestions")
 
             return {"answer": answer}
         

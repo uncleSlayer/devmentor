@@ -87,6 +87,7 @@ def create_conversation(question: Question, request: Request):
                         "code_snippet": ai_answer.code_snippet,
                         "code_language": ai_answer.code_language,
                     },
+                    "youtube_suggestions": answer.get("youtube_suggestions"),
                 }
 
     except Exception as e:
