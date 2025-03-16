@@ -12,9 +12,9 @@ const page = () => {
 
   return (
     <div className='flex h-full flex-col justify-between gap-4'>
-      <ScrollArea className='w-full h-[95%] rounded-lg'>
+      <div className='w-full h-[95%] overflow-y-scroll rounded-lg'>
         <ChatWindow conversationId={id} />
-      </ScrollArea>
+      </div>
       <TextInput conversationId={id} continuationOfConversation={true} />
     </div>
   )

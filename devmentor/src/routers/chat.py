@@ -17,54 +17,59 @@ def question(question: UserQuestion, request: Request):
     This endpoint is used to ask a new question to the AI. This also starts a new conversation in the database.
     """
 
-    question = question.question
+    try:
+        question = question.question
 
-    token = request.cookies.get("auth_token")
+        token = request.cookies.get("auth_token")
 
-    payload = verify_token(token)
+        payload = verify_token(token)
 
-    user_email = payload.get("email")
+        user_email = payload.get("email")
 
-    if not user_email:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        if not user_email:
+            raise HTTPException(status_code=401, detail="Not authenticated")
 
-    with Session(engine) as session:
+        with Session(engine) as session:
 
-        statement = select(User).where(User.email == user_email)
+            statement = select(User).where(User.email == user_email)
 
-        existing_user = session.exec(statement).first()
+            existing_user = session.exec(statement).first()
 
-        if not existing_user:
-            raise HTTPException(status_code=401, detail="User does not exist")
+            if not existing_user:
+                raise HTTPException(status_code=401, detail="User does not exist")
 
-        conversation = Conversation(user_id=existing_user.id)
-        session.add(conversation)
-        session.commit()
+            conversation = Conversation(user_id=existing_user.id)
+            session.add(conversation)
+            session.commit()
 
-        user_question = UserQuestion(
-            author_id=existing_user.id,
-            question=question,
-            conversation_id=conversation.id,
-        )
-        session.add(user_question)
-        session.commit()
+            user_question = UserQuestion(
+                author_id=existing_user.id,
+                question=question,
+                conversation_id=conversation.id,
+            )
+            session.add(user_question)
+            session.commit()
 
-        answer = dict(generate_answer(question))
+            answer = dict(generate_answer(question))
 
-        ai_answer = AiAnswer(
-            user_question_id=user_question.id,
-            answer=answer.get("answer"),
-            code_snippet=answer.get("code_block"),
-            code_language="python",
-        )
+            ai_answer = AiAnswer(
+                user_question_id=user_question.id,
+                answer=answer.get("answer"),
+                code_snippet=answer.get("code_block"),
+                code_language="python",
+            )
 
-        session.add(ai_answer)
+            session.add(ai_answer)
 
-        session.commit()
+            session.commit()
 
-        answer["id"] = ai_answer.id
+            answer["id"] = ai_answer.id
 
-        return {"answer": answer}
+            return {"answer": answer}
+        
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/chat/{conversation_id}")

@@ -28,7 +28,6 @@ const ChatWindow = ({
                 const response = await axios.get(`${env.SERVER_URL}/chat/${conversationId}`, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                     },
                     withCredentials: true
                 })

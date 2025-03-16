@@ -5,3 +5,4 @@ class SingleQuestionChatState(TypedDict):
     question: str
     answer: str
     code_block: str
+    youtube_suggestions: list[str]

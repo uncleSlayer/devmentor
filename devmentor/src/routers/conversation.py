@@ -5,6 +5,7 @@ from sqlmodel import select, Session
 from src.token_verify import verify_token
 from pydantic import BaseModel
 from src.langgraph.graph import generate_answer
+import youtube_search
 
 router = APIRouter()
 
@@ -22,7 +23,6 @@ class Question(BaseModel):
 def create_conversation(question: Question, request: Request):
     """
     Create a new conversation with a question
-
     """
 
     try:
@@ -90,4 +90,5 @@ def create_conversation(question: Question, request: Request):
                 }
 
     except Exception as e:
+        print("Error creating conversation:", e)
         raise HTTPException(status_code=400, detail=str(e))

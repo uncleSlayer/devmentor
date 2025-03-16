@@ -1,11 +1,30 @@
 from langgraph.graph import StateGraph
 from src.langgraph.state import SingleQuestionChatState
 from src.ai import llm, retriver
+from src.langgraph.tools import youtube_search_tool
+from youtube_search import YoutubeSearch
 
 single_question_chat_graph = StateGraph(SingleQuestionChatState)
 
 
 class SingleQuestionGraph:
+
+    def generate_youtube_suggestions(state):
+        
+        """
+        This function uses a tool to generate youtube suggestions based on the question.
+        The tool takes the question as input and returns a list of youtube video ids.
+        """
+
+        question = state["question"]
+
+        print(f"question: {question}")
+
+        youtube_suggestions = youtube_search_tool.run(question)
+
+        state["youtube_suggestions"] = youtube_suggestions
+
+        return state
 
     def generate_answer(state):
         """
@@ -69,7 +88,6 @@ class SingleQuestionGraph:
 
         return state
 
-
 single_question_chat_graph.add_node(
     "generate_answer", SingleQuestionGraph.generate_answer
 )
@@ -78,13 +96,19 @@ single_question_chat_graph.add_node(
     "generate_code_block", SingleQuestionGraph.generate_code_block
 )
 
+single_question_chat_graph.add_node(
+    "generate_youtube_suggestions", SingleQuestionGraph.generate_youtube_suggestions
+)
+
+single_question_chat_graph.add_edge("generate_youtube_suggestions", "generate_answer")
+
 single_question_chat_graph.add_edge("generate_answer", "generate_code_block")
 
-single_question_chat_graph.set_entry_point("generate_answer")
+single_question_chat_graph.set_entry_point("generate_youtube_suggestions")
 
 runner = single_question_chat_graph.compile({})
 
 
 def generate_answer(question: str):
 
-    return runner.invoke({"question": question, "answer": "", "code_block": ""})
+    return runner.invoke({"question": question, "answer": "", "code_block": "", "youtube_suggestions": []})
