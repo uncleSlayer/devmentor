@@ -5,7 +5,6 @@ from sqlmodel import select, Session
 from src.token_verify import verify_token
 from pydantic import BaseModel
 from src.langgraph.graph import generate_answer
-import youtube_search
 
 router = APIRouter()
 
@@ -68,7 +67,7 @@ def create_conversation(question: Question, request: Request):
 
                 session.add(ai_answer)
                 session.commit()
-                
+
                 for youtube_suggestion_url in answer.get("youtube_suggestions"):
                     
                     youtube_suggestion = AiAnswerSuggestion(
@@ -97,7 +96,6 @@ def create_conversation(question: Question, request: Request):
                         "code_snippet": ai_answer.code_snippet,
                         "code_language": ai_answer.code_language,
                         "youtube_suggestions": ai_answer.suggestions,
-                        # "blog_suggestions": ai_answer.blog_suggestions
                     }
                 }
 

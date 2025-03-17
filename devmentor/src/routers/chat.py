@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException
-from src.database.model import UserQuestion, User, AiAnswer, Conversation
+from src.database.model import UserQuestion, User, AiAnswer, Conversation, AiAnswerSuggestion, SuggestionType
 from src.token_verify import verify_token
 from sqlmodel import Session, select
 from src.database.connection import engine
@@ -138,7 +138,8 @@ def chat(conversation_id: str, request: Request):
                             "answer_id": retrived_ai_answer.id,
                             "answer": retrived_ai_answer.answer,
                             "code_snippet": retrived_ai_answer.code_snippet,
-                            "code_language": retrived_ai_answer.code_language
+                            "code_language": retrived_ai_answer.code_language,
+                            "youtube_suggestions": retrived_ai_answer.suggestions,
                         },
                     } for retrived_user_question, retrived_ai_answer, _ in result
                 ]
@@ -203,12 +204,25 @@ def chat(conversation_id: str, request: Request, question: ContinueQuestion):
             session.add(ai_answer)
             session.commit()
 
+            for youtube_suggestion_url in answer.get("youtube_suggestions"):
+                
+                youtube_suggestion = AiAnswerSuggestion(
+                    ai_answer_id=ai_answer.id,
+                    suggestion_type=SuggestionType.YOUTUBE,
+                    title="some random title",
+                    url=youtube_suggestion_url,
+                )
+
+                session.add(youtube_suggestion)
+                session.commit()
+
             return {"answer": {
                 "answer_info": {
                     "answer_id": ai_answer.id,
                     "answer": ai_answer.answer,
                     "code_snippet": ai_answer.code_snippet,
-                    "code_language": ai_answer.code_language
+                    "code_language": ai_answer.code_language,
+                    "youtube_suggestions": ai_answer.suggestions,
                 },
                 "user_question_info": {
                     "question_id": new_question.id,
