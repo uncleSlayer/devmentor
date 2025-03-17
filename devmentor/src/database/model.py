@@ -1,6 +1,7 @@
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, Relationship
 import uuid
+from enum import Enum
 
 
 class User(SQLModel, table=True):
@@ -74,3 +75,33 @@ class AiAnswer(SQLModel, table=True):
     answer: str
     code_snippet: Optional[str] = Field(nullable=True)
     code_language: Optional[str] = Field(nullable=True)
+    suggestions: Optional[List["AiAnswerSuggestion"]] = Relationship(back_populates="ai_answer")
+
+
+class SuggestionType(str, Enum):
+    """
+    Enum class to represent the type of suggestion (YouTube or Blog Article)
+    """
+    YOUTUBE = "youtube"
+    BLOG_ARTICLE = "blog_article"
+
+class AiAnswerSuggestion(SQLModel, table=True):
+    """
+    This class represents additional learning resources (YouTube videos or blog articles)
+    suggested by the AI for a specific answer
+
+    Attributes:
+        id (Optional[UUID]): The primary key of the suggestion
+        ai_answer_id (UUID): The foreign key to the AI answer this suggestion belongs to
+        suggestion_type (SuggestionType): The type of suggestion (YouTube or blog article)
+        title (str): The title of the suggested resource
+        url (str): The URL of the suggested resource
+        description (Optional[str]): A brief description of the suggested resource
+    """
+    
+    id: Optional[uuid.UUID] = Field(primary_key=True, default_factory=uuid.uuid4)
+    ai_answer_id: uuid.UUID = Field(foreign_key="aianswer.id", nullable=False)
+    ai_answer: Optional[AiAnswer] = Relationship(back_populates="suggestions")
+    suggestion_type: SuggestionType
+    title: str
+    url: str

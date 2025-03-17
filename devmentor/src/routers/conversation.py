@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
-from src.database.model import User, Conversation, UserQuestion, AiAnswer
+from src.database.model import User, Conversation, UserQuestion, AiAnswer, AiAnswerSuggestion, SuggestionType
 from src.database.connection import engine
 from sqlmodel import select, Session
 from src.token_verify import verify_token
@@ -26,16 +26,13 @@ def create_conversation(question: Question, request: Request):
     """
 
     try:
-
         token = request.cookies.get("auth_token")
         question = question.question
 
         if not token:
             raise HTTPException(status_code=401, detail="Not authenticated")
         else:
-
             payload = verify_token(token)
-
             user_email = payload.get("email")
 
             if not user_email:
@@ -67,9 +64,22 @@ def create_conversation(question: Question, request: Request):
                     answer=answer.get("answer"),
                     code_snippet=answer.get("code_block"),
                     code_language="python",
-                )
+                ) 
+
                 session.add(ai_answer)
                 session.commit()
+                
+                for youtube_suggestion_url in answer.get("youtube_suggestions"):
+                    
+                    youtube_suggestion = AiAnswerSuggestion(
+                        ai_answer_id=ai_answer.id,
+                        suggestion_type=SuggestionType.YOUTUBE,
+                        title="some random title",
+                        url=youtube_suggestion_url,
+                    )
+
+                    session.add(youtube_suggestion)
+                    session.commit()
 
                 return {
                     "conversation": {
@@ -86,8 +96,9 @@ def create_conversation(question: Question, request: Request):
                         "answer": ai_answer.answer,
                         "code_snippet": ai_answer.code_snippet,
                         "code_language": ai_answer.code_language,
-                    },
-                    "youtube_suggestions": answer.get("youtube_suggestions"),
+                        "youtube_suggestions": ai_answer.suggestions,
+                        # "blog_suggestions": ai_answer.blog_suggestions
+                    }
                 }
 
     except Exception as e:

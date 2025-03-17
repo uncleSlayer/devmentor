@@ -14,7 +14,8 @@ interface ConversationState {
                 answer: string,
                 code_snippet: string,
                 code_language: string
-            }
+            },
+            youtube_video_suggestions: string[]
         }[]
     }[],
     addConversation: (conversation: {
@@ -30,7 +31,8 @@ interface ConversationState {
                 answer: string,
                 code_snippet: string,
                 code_language: string
-            }
+            },
+            youtube_video_suggestions: string[]
         }[]
     }) => void,
     addPlaceHolderMessageToAnExistingConversation: (conversationId: string, question: string) => void,
@@ -44,7 +46,8 @@ interface ConversationState {
             answer: string,
             code_snippet: string,
             code_language: string
-        }
+        },
+        youtube_video_suggestions: string[]
     }) => void,
 }
 
@@ -73,7 +76,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
                         answer: 'Thinking...',
                         code_snippet: 'None',
                         code_language: 'Python'
-                    }
+                    },
+                    youtube_video_suggestions: []
                 }
             ]
             const updatedConversations = state.conversations.map((cv) =>
@@ -94,7 +98,8 @@ export const useConversationStore = create<ConversationState>()((set) => ({
                 ...conversation.chat.filter((chat) => chat.question.id !== 'placeholder'),
                 {
                     question: continuationMessageInfo.questionInfo,
-                    answer: continuationMessageInfo.answerInfo
+                    answer: continuationMessageInfo.answerInfo,
+                    youtube_video_suggestions: continuationMessageInfo.youtube_video_suggestions
                 }
             ]
             const updatedConversations = state.conversations.map((cv) =>

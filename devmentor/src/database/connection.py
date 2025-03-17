@@ -3,7 +3,7 @@ from sqlmodel import create_engine, Session
 
 DATABASE_URL = "postgresql+psycopg://devmentor:devmentor@localhost:5432/devmentor"
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 
 
 def get_session():
