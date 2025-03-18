@@ -236,7 +236,7 @@ def chat(conversation_id: str, request: Request, question: ContinueQuestion):
 
 
 @router.get("/run/{answer_id}")
-def run_code(answer_id: int, request: Request):
+def run_code(answer_id: str, request: Request):
     token = request.cookies.get("auth_token")
 
     payload = verify_token(token)
@@ -266,4 +266,4 @@ def run_code(answer_id: int, request: Request):
 
         code_runner_output = run_ai_answer_code(code_block=code_block)
 
-        return {"code_block": code_runner_output}
+        return {"code_output": code_runner_output}

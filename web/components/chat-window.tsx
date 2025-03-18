@@ -6,6 +6,19 @@ import { User, Bot } from 'lucide-react'
 import { useConversationStore } from '@/zustand/store'
 import axios from 'axios'
 import { env } from '@/config/env'
+import Link from 'next/link'
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
+import { Button } from './ui/button'
+import CodeRenderer from './ui/code-renderer'
 
 const ChatWindow = ({
     conversationId
@@ -18,6 +31,9 @@ const ChatWindow = ({
     const conversationDetails = conversations.find((cv) => cv.id === conversationId)
 
     const chats = conversationDetails?.chat
+
+    const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
+    const [codeRunnerResponse, setCodeRunnerResponse] = React.useState<null | string>(null)
 
     if (!chats) {
 
@@ -112,6 +128,9 @@ const ChatWindow = ({
                                 message={answer.answer}
                                 sender="bot"
                                 avatar={<Bot className="h-4 w-4" />}
+                                setDrawerOpen={setIsDrawerOpen}
+                                setCodeRunnerResponse={setCodeRunnerResponse}
+                                answerId={answer.id}
                             />
                             <div className='ml-14'>
                                 <span className='text-xs text-slate-700'>Youtube Video Suggestions: </span>
@@ -126,11 +145,14 @@ const ChatWindow = ({
                                             const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/0.jpg`
 
                                             return (
-                                                <div className='w-52 h-32 rounded-lg overflow-hidden' key={index}>
-                                                    {
-                                                        <img className='object-cover w-full h-full' src={thumbnailUrl} alt="Youtube video" />
-                                                    }
-                                                </div>
+                                                <Link href={yt_suggestion.url} target='_blank' className='cursor-pointer' key={index}>
+                                                    <div className='w-52 h-32 rounded-lg overflow-hidden'>
+                                                        {
+                                                            <img className='object-cover w-full h-full' src={thumbnailUrl} alt="Youtube video" />
+                                                        }
+                                                    </div>
+                                                </Link>
+
                                             )
                                         })
                                     }
@@ -140,6 +162,23 @@ const ChatWindow = ({
                     })
                 }
             </div>
+            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                <DrawerContent>
+                    <DrawerHeader>
+                        <DrawerTitle>Running the code.</DrawerTitle>
+                        <DrawerDescription>We run the code in an isolated docker container in our servers.</DrawerDescription>
+                    </DrawerHeader>
+                    <DrawerFooter>
+                        {
+                            !codeRunnerResponse && <span>Running the code, Please wait...</span>
+                        }
+                        {
+                            codeRunnerResponse && <CodeRenderer text={codeRunnerResponse} />
+                        }
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
+
         </div>
     )
 }

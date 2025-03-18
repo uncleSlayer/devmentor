@@ -15,22 +15,29 @@ export const usePrismHighlight = () => {
 };
 
 const formatCodeBlocks = (text: string) => {
-    return text.replace(
-        /```(\w+)?\s([\s\S]*?)```/g,
-        (match, lang, code) => {
-            const languageClass = lang ? `language-${lang}` : "language-plaintext";
-            return `<pre><code class="${languageClass}">${code
-                .trim()
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")}</code></pre>`;
-        }
-    );
+    const regex = /```(\w+)?\s([\s\S]*?)```/g;
+    const parts = [];
+    let lastIndex = 0;
+
+    text.replace(regex, (match, lang, code, index) => {
+        parts.push(text.slice(lastIndex, index)); // Push text before the code block
+        parts.push(
+            <pre key={index} className={`language-${lang || "plaintext"}`}>
+                <code className={`language-${lang || "plaintext"}`}>{code.trim()}</code>
+            </pre>
+        );
+        lastIndex = index + match.length;
+        return match;
+    });
+
+    parts.push(text.slice(lastIndex)); // Push remaining text
+    return parts;
 };
 
 const CodeRenderer = ({ text }: { text: string }) => {
     usePrismHighlight(); // Ensure syntax highlighting is applied after render
 
-    return <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: formatCodeBlocks(text) }} />;
+    return <div className="prose max-w-none">{formatCodeBlocks(text)}</div>;
 };
 
 export default CodeRenderer;

@@ -1,7 +1,7 @@
 "use client"
 
 import { Calendar, Home, Inbox, PlusIcon, Search, Settings } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     Sidebar,
     SidebarContent,
@@ -11,7 +11,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarFooter
+    // SidebarFooter
 } from "@/components/ui/sidebar"
 import { Button } from "./ui/button"
 import { useRouter } from "next/navigation"
@@ -65,8 +65,8 @@ export function AppSidebar() {
                     </span>
                 </Button>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Message history</SidebarGroupLabel>
-                    <SidebarGroupContent>
+                    {/* <SidebarGroupLabel>Message history</SidebarGroupLabel> */}
+                    {/* <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
                                 <SidebarMenuItem key={item.title}>
@@ -79,7 +79,7 @@ export function AppSidebar() {
                                 </SidebarMenuItem>
                             ))}
                         </SidebarMenu>
-                    </SidebarGroupContent>
+                    </SidebarGroupContent> */}
                 </SidebarGroup>
             </SidebarContent>
             {/* <SidebarFooter className="flex flex-row items-center border m-2 shadow-lg rounded-lg" >

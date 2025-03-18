@@ -1,12 +1,11 @@
 'use client'
 
 import ChatWindow from '@/components/chat-window'
-import { ScrollArea } from "@/components/ui/scroll-area"
 import TextInput from '@/components/text-input'
 import { useParams } from 'next/navigation'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
 
   const { id } = useParams<{ id: string }>()
 
@@ -20,4 +19,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

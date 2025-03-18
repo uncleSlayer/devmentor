@@ -6,7 +6,7 @@ import Image from 'next/image'
 import React from 'react'
 import { User, Bot } from 'lucide-react'
 
-const page = () => {
+const Page = () => {
 
     const [question, setQuestion] = React.useState('')
 
@@ -39,4 +39,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page
