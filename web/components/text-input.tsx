@@ -57,8 +57,14 @@ const TextInput = ({
                 const { conversation, ai_answer, question_info }: {
                     conversation: { conversation_id: string, title: string },
                     question_info: { question_id: string, question: string, author_id: string },
-                    ai_answer: { answer_id: string, answer: string, code_snippet: string, code_language: string }
-                } = response.data
+                    ai_answer: { answer_id: string, answer: string, code_snippet: string, code_language: string, youtube_suggestions: {
+                        ai_answer_id: string,
+                        suggestion_type: string,
+                        url: string,
+                        title: string,
+                        id: string
+                    }[] }
+                } = response.data 
 
                 addConversation({
                     id: conversation.conversation_id,
@@ -73,7 +79,12 @@ const TextInput = ({
                                 id: ai_answer.answer_id,
                                 answer: ai_answer.answer,
                                 code_snippet: ai_answer.code_snippet,
-                                code_language: ai_answer.code_language
+                                code_language: ai_answer.code_language,
+                                youtube_video_suggestions: ai_answer.youtube_suggestions.map((youtube_suggestion) => ({
+                                    aiAnswerId: youtube_suggestion.ai_answer_id,
+                                    url: youtube_suggestion.url,
+                                    youtubeSuggestionId: youtube_suggestion.id
+                                }))
                             }
                         }
                     ]
@@ -91,13 +102,13 @@ const TextInput = ({
 
             addPlaceHolderMessageToAnExistingConversation(conversationId, messageInputText)
             setMessageInputText('')
-            
+
             // first we will add a placeholder message to the chat,
             // then we will make an api call to the server to get the next question and answer
             // and then we will add the new question and answer to the redux state
 
             // Before making the api call, we will add the placeholder message to the chat
-            
+
             const response = await axios.post(`${SERVER_URL}/chat/continue/${conversationId}`, {
                 question: messageInputText
             }, {
@@ -108,27 +119,10 @@ const TextInput = ({
             })
 
             if (response.status !== 200) {
-                
-                toast.error("Something went wrong. Please try again later with a different question.")
-            
-            } else {
 
-                // response format:
-                // {
-                //     "answer": {
-                //         "answer_info": {
-                //             "answer_id": "aee608a2-460c-4231-80d3-97b3de04e98f",
-                //             "answer": "Generator functions in Python are functions that use the `yield` keyword to return a value and pause the function's execution, allowing it to be resumed later. When a generator function is called, it returns a generator object without actually running the function. The generator object can then be iterated over using a `for` loop or by calling the `next()` function.\n\nHere is an example of a simple generator function that yields values from 0 to n:\n\n```python\ndef my_generator(n):\n    for i in range(n):\n        yield i\n\n# Using the generator function\ngen = my_generator(5)\nfor value in gen:\n    print(value)\n```\n\nWhen the `my_generator` function is called with an argument of 5, it returns a generator object. The `for` loop then iterates over the generator object, calling `next()` behind the scenes to retrieve each yielded value.\n\nGenerator functions are useful for generating large sequences of values without storing them all in memory at once. They are memory efficient and can be more performant than using lists or other data structures for generating sequences.",
-                //             "code_snippet": "```python\ndef my_generator(n):\n    for i in range(n):\n        yield i\n\n# Using the generator function\ngen = my_generator(5)\nfor value in gen:\n    print(value)\n```",
-                //             "code_language": "python"
-                //         },
-                //         "user_question_info": {
-                //             "question_id": "bf922fae-5e17-4036-9b27-6e7b0bddfd85",
-                //             "question": "Explain me how generator functions work in python",
-                //             "author_id": "8911624e-597a-41ad-8996-a15f6261852e"
-                //         }
-                //     }
-                // }
+                toast.error("Something went wrong. Please try again later with a different question.")
+
+            } else { 
 
                 addContinuationMessageToAnExistingConversation(conversationId, {
                     questionInfo: {
@@ -139,7 +133,18 @@ const TextInput = ({
                         id: response.data.answer.answer_info.answer_id,
                         answer: response.data.answer.answer_info.answer,
                         code_snippet: response.data.answer.answer_info.code_snippet,
-                        code_language: response.data.answer.answer_info.code_language
+                        code_language: response.data.answer.answer_info.code_language,
+                        youtube_video_suggestions: response.data.answer.answer_info.youtube_suggestions.map((youtube_video_suggestion: {
+                            ai_answer_id: string,
+                            suggestion_type: string,
+                            url: string,
+                            title: string,
+                            id: string
+                        }) => ({
+                            aiAnswerId: youtube_video_suggestion.ai_answer_id,
+                            url: youtube_video_suggestion.url,
+                            youtubeSuggestionId: youtube_video_suggestion.id
+                        }))
                     }
                 })
 

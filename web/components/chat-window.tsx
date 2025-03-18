@@ -18,20 +18,20 @@ const ChatWindow = ({
     const conversationDetails = conversations.find((cv) => cv.id === conversationId)
 
     const chats = conversationDetails?.chat
-    
+
     if (!chats) {
 
         const getChatsFromServer = async () => {
-            
+
             try {
-                
+
                 const response = await axios.get(`${env.SERVER_URL}/chat/${conversationId}`, {
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     withCredentials: true
                 })
-                
+
                 if (response.status !== 200) {
 
                     console.error('Error fetching chats from server:', response.statusText)
@@ -52,7 +52,14 @@ const ChatWindow = ({
                                 answer_id: string,
                                 answer: string,
                                 code_snippet: string,
-                                code_language: string
+                                code_language: string,
+                                youtube_suggestions: {
+                                    ai_answer_id: string,
+                                    suggestion_type: string,
+                                    url: string,
+                                    title: string,
+                                    id: string
+                                }[]
                             }
                         }) => ({
                             question: {
@@ -63,7 +70,12 @@ const ChatWindow = ({
                                 id: answer.answer_id,
                                 answer: answer.answer,
                                 code_snippet: answer.code_snippet,
-                                code_language: answer.code_language
+                                code_language: answer.code_language,
+                                youtube_video_suggestions: answer.youtube_suggestions.map((youtube_suggestion) => ({
+                                    aiAnswerId: youtube_suggestion.ai_answer_id,
+                                    url: youtube_suggestion.url,
+                                    youtubeSuggestionId: youtube_suggestion.id
+                                }))
                             }
                         }))
                     })
@@ -73,7 +85,7 @@ const ChatWindow = ({
             } catch (error) {
 
                 console.error('Error fetching chats from server:', error)
-            
+
             }
 
         }
@@ -83,7 +95,7 @@ const ChatWindow = ({
     }
 
     return (
-        <div> 
+        <div>
             <div className="flex flex-col gap-4 p-4">
                 {
                     chats?.map((chat, index) => {
@@ -101,9 +113,32 @@ const ChatWindow = ({
                                 sender="bot"
                                 avatar={<Bot className="h-4 w-4" />}
                             />
+                            <div className='ml-14'>
+                                <span className='text-xs text-slate-700'>Youtube Video Suggestions: </span>
+                                <div className='flex gap-4 items-center'>
+                                    {
+                                        answer.youtube_video_suggestions && answer.youtube_video_suggestions.map((yt_suggestion, index) => {
+
+                                            const indexOfPattern = yt_suggestion.url.indexOf("?v=")
+
+                                            const videoId = yt_suggestion.url.substring(indexOfPattern + 3, indexOfPattern + 3 + 11)
+
+                                            const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/0.jpg`
+
+                                            return (
+                                                <div className='w-52 h-32 rounded-lg overflow-hidden' key={index}>
+                                                    {
+                                                        <img className='object-cover w-full h-full' src={thumbnailUrl} alt="Youtube video" />
+                                                    }
+                                                </div>
+                                            )
+                                        })
+                                    }
+                                </div>
+                            </div>
                         </div>)
                     })
-                } 
+                }
             </div>
         </div>
     )
