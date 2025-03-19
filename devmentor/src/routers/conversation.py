@@ -5,6 +5,7 @@ from sqlmodel import select, Session
 from src.token_verify import verify_token
 from pydantic import BaseModel
 from src.langgraph.graph import generate_answer
+import ast
 
 router = APIRouter()
 
@@ -27,7 +28,6 @@ def create_conversation(question: Question, request: Request):
     try:
         token = request.cookies.get("auth_token")
         question = question.question
-
         if not token:
             raise HTTPException(status_code=401, detail="Not authenticated")
         else:
@@ -44,7 +44,7 @@ def create_conversation(question: Question, request: Request):
                 if not existing_user:
                     raise HTTPException(status_code=401, detail="Not authenticated")
 
-                conversation = Conversation(user_id=existing_user.id)
+                conversation = Conversation(user_id=existing_user.id) 
                 session.add(conversation)
                 session.commit()
 
@@ -53,22 +53,28 @@ def create_conversation(question: Question, request: Request):
                     conversation_id=conversation.id,
                     question=question,
                 )
+
                 session.add(new_question)
                 session.commit()
 
                 answer = dict(generate_answer(question))
-
+                
+                code_block_retrived_from_answer = answer.get("code_block")
+                
                 ai_answer = AiAnswer(
                     user_question_id=new_question.id,
                     answer=answer.get("answer"),
-                    code_snippet=answer.get("code_block"),
-                    code_language="python",
+                    code_snippet=code_block_retrived_from_answer if code_block_retrived_from_answer else None,
+                    code_language="python" if code_block_retrived_from_answer else None,
                 ) 
 
                 session.add(ai_answer)
                 session.commit()
 
-                for youtube_suggestion_url in answer.get("youtube_suggestions"):
+                for youtube_suggestion_url in answer.get("youtube_suggestions"): 
+
+                    if not youtube_suggestion_url:
+                        continue
                     
                     youtube_suggestion = AiAnswerSuggestion(
                         ai_answer_id=ai_answer.id,

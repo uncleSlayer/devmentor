@@ -10,7 +10,7 @@ single_question_chat_graph = StateGraph(SingleQuestionChatState)
 class SingleQuestionGraph:
 
     def generate_youtube_suggestions(state):
-        
+
         """
         This function uses a tool to generate youtube suggestions based on the question.
         The tool takes the question as input and returns a list of youtube video ids.
@@ -18,11 +18,27 @@ class SingleQuestionGraph:
 
         question = state["question"]
 
-        youtube_suggestions = youtube_search_tool.run(question)
+        question_modified_for_youtube_search_query = llm.invoke(f"""
+            You are a helpful assistant that modifies the question to be used in a youtube search query.
+            Convert the question into a short youtube search query.
+                                                                
+            Strict rule 
+            1. If the question is not related to computer science, reply with "None".
+            2. If the question is related to computer science, reply with the youtube search query. No quotes, nothing other than the query itself, just the query for example - How to write binary search in python?
 
-        state["youtube_suggestions"] = ast.literal_eval(youtube_suggestions)
+            Question: "{question}"
+        """).content
+ 
+        if question_modified_for_youtube_search_query == "None":
+            return state
+        
+        else:
+            
+            youtube_suggestions = youtube_search_tool.run(question_modified_for_youtube_search_query)
 
-        return state
+            state["youtube_suggestions"] = ast.literal_eval(youtube_suggestions)
+
+            return state
 
     def generate_answer(state):
         """
@@ -34,23 +50,27 @@ class SingleQuestionGraph:
 
         question = state["question"]
 
-        retrived_documents = retriver.invoke(question)
+        # retrived_documents = retriver.invoke(question)
 
         answer = llm.invoke(
             f"""
             You are a helpful assistant that answers questions based on the provided context.
-            If you don't know the answer, just say that you don't know. Don't try to make up an answer.
+            If you don't know the answer, reply with "I don't know the answer to this question". Don't try to make up an answer.
             If the user asks for code, write all the code in one code block. Don't write code that can't be run in a basic python repl.
             Your code example will be ran in a docker container of a python repl.
-
-            Document context:
-            {retrived_documents}
 
             Question: "{question}"
         """
         )
 
         state["answer"] = dict(answer).get("content")
+
+        if state["answer"] == "I don't know the answer to this question":
+
+            if state["youtube_suggestions"]:
+                state["answer"] = "I don't have relevant information to answer this question, however, I am attaching some youtube videos that might help you with your question."
+            else:
+                state["answer"] = "We can't answer this question. Please ask a different question."
 
         return state
 
@@ -108,5 +128,4 @@ runner = single_question_chat_graph.compile({})
 
 
 def generate_answer(question: str):
-
     return runner.invoke({"question": question, "answer": "", "code_block": "", "youtube_suggestions": []})

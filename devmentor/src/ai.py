@@ -52,8 +52,6 @@ def generate_answer(question: str):
 
     retrived_documents = retriver.invoke(question)
 
-    print("retrived documents", retrived_documents)
-
     serialized_documents = [doc for doc in retrived_documents]
 
     answer = llm.invoke(f"""

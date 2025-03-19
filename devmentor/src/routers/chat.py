@@ -6,6 +6,7 @@ from src.database.connection import engine
 from src.langgraph.graph import generate_answer
 from src.docker import run_ai_answer_code
 from pydantic import BaseModel
+import ast
 
 
 router = APIRouter()
@@ -48,24 +49,44 @@ def question(question: UserQuestion, request: Request):
                 question=question,
                 conversation_id=conversation.id,
             )
+
             session.add(user_question)
             session.commit()
 
             answer = dict(generate_answer(question))
 
+            code_block_retrived_from_answer = ast.literal_eval(answer.get("code_block"))
+
             ai_answer = AiAnswer(
                 user_question_id=user_question.id,
                 answer=answer.get("answer"),
-                code_snippet=answer.get("code_block"),
-                code_language="python",
+                code_snippet=code_block_retrived_from_answer if code_block_retrived_from_answer else None,
+                code_language="python" if code_block_retrived_from_answer else None,
             )
 
             session.add(ai_answer)
 
             session.commit()
 
+            # So here we aren't creating the youtube suggestion in the database, we are just returning the youtube suggestions
+
+            for youtube_suggestion_url in answer.get("youtube_suggestions"):
+                
+                if not youtube_suggestion_url:
+                    continue
+                
+                youtube_suggestion = AiAnswerSuggestion(
+                    ai_answer_id=ai_answer.id,
+                    suggestion_type=SuggestionType.YOUTUBE,
+                    title="some random title",
+                    url=youtube_suggestion_url,
+                )
+
+                session.add(youtube_suggestion)
+                session.commit()
+
             answer["id"] = ai_answer.id
-            answer["youtube_suggestions"] = answer.get("youtube_suggestions")
+            answer["youtube_suggestions"] = ai_answer.suggestions
 
             return {"answer": answer}
         
