@@ -9,6 +9,21 @@ single_question_chat_graph = StateGraph(SingleQuestionChatState)
 
 class SingleQuestionGraph:
 
+
+    def prompt_sanitation(state):
+        """
+        This function is called when the user asks a question.
+        It sanitizes the question by removing any bad words and punctuations or anything that might cause issues.
+        The sanitized question is then stored in the langgraph state.
+        """   
+
+        question = state["question"]
+
+        question_modified_for_prompt_sanitation = llm.invoke(f"""
+            
+        """)
+
+
     def generate_youtube_suggestions(state):
 
         """

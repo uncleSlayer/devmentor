@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import React from "react"
 import axios from "axios"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function LoginForm({
   className,
@@ -30,10 +31,13 @@ export function LoginForm({
     }) 
 
     if (response.status !== 200) {
-      console.log("something went wrong")
+      
+      toast("Something went wrong. Please try again.")
+
     } else {
-      console.log(response.data)
+      
       router.push('/conversation/new')
+    
     }
 
   }

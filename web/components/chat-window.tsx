@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/drawer"
 import { Button } from './ui/button'
 import CodeRenderer from './ui/code-renderer'
+import { toast } from "sonner"
 
 const ChatWindow = ({
     conversationId
@@ -50,7 +51,7 @@ const ChatWindow = ({
 
                 if (response.status !== 200) {
 
-                    console.error('Error fetching chats from server:', response.statusText)
+                    toast("Something went wrong, please try again.")
 
                 } else {
 
@@ -100,7 +101,7 @@ const ChatWindow = ({
 
             } catch (error) {
 
-                console.error('Error fetching chats from server:', error)
+                toast("Something went wrong, please try again.")
 
             }
 

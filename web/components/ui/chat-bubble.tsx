@@ -7,6 +7,7 @@ import { Button } from "./button";
 import { Play } from "lucide-react"
 import axios from "axios";
 import { SERVER_URL } from "@/config";
+import { toast } from "sonner";
 
 interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   message: string
@@ -72,7 +73,12 @@ const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
                     withCredentials: true
                   })
 
+                  if (response.status !== 200) {
+                    toast("Something went wrong, please try again.")
+                  }
+
                   const { code_output }: { code_output: string } = response.data
+                  
                   if (setCodeRunnerResponse) {
                     setCodeRunnerResponse(code_output)
                   }
