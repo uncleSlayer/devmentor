@@ -134,7 +134,10 @@ const ChatWindow = ({
                                 answerId={answer.id}
                             />
                             <div className='ml-14'>
-                                <span className='text-xs text-slate-700'>Youtube Video Suggestions: </span>
+                                {
+                                    answer.youtube_video_suggestions && answer.youtube_video_suggestions.length > 0 &&
+                                    <span className='text-xs text-slate-700'>Youtube Video Suggestions: </span>
+                                }
                                 <div className='flex gap-4 items-center'>
                                     {
                                         answer.youtube_video_suggestions && answer.youtube_video_suggestions.map((yt_suggestion, index) => {
