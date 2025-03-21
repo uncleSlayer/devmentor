@@ -8,6 +8,7 @@ import { Play } from "lucide-react"
 import axios from "axios";
 import { SERVER_URL } from "@/config";
 import { toast } from "sonner";
+import { useConversationStore } from "@/zustand/store";
 
 interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   message: string
@@ -15,12 +16,20 @@ interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement> {
   timestamp?: string
   avatar?: React.ReactNode,
   answerId?: string,
+  conversationId?: string,
   setDrawerOpen?: React.Dispatch<React.SetStateAction<boolean>>
-  setCodeRunnerResponse?: React.Dispatch<React.SetStateAction<null | string>>
+  setCodeRunnerResponse?: React.Dispatch<React.SetStateAction<null | string>>,
 }
 
 const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
-  ({ message, sender = "user", timestamp, avatar, className, answerId, setCodeRunnerResponse, setDrawerOpen, ...props }, ref) => {
+  ({ message, sender = "user", timestamp, avatar, className, answerId, conversationId, setCodeRunnerResponse, setDrawerOpen, ...props }, ref) => {
+
+    const { conversations } = useConversationStore()
+
+    const currentChatInfo = conversations.find((cv) => cv.id === conversationId)
+
+    const codeSnippet = currentChatInfo?.chat.find((chat) => chat.answer.id === answerId)?.answer.code_snippet 
+
     return (
       <div
         ref={ref}
@@ -55,7 +64,7 @@ const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
             </time>
           )}
         </div>
-        {sender === "bot" && (
+        {sender === "bot" && codeSnippet !== "None" && (
           <div>
             <Button
               size="sm"

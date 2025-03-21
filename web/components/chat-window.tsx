@@ -128,6 +128,7 @@ const ChatWindow = ({
                             <ChatBubble
                                 message={answer.answer}
                                 sender="bot"
+                                conversationId={conversationId}
                                 avatar={<Bot className="h-4 w-4" />}
                                 setDrawerOpen={setIsDrawerOpen}
                                 setCodeRunnerResponse={setCodeRunnerResponse}
